@@ -4,7 +4,7 @@
       if (!session.token) {
         return {
           status: 302,
-          redirect: '/login',
+          redirect: '/',
         };
       }
       // Additional data loading for authenticated users can go here
@@ -13,47 +13,73 @@
   
 <script>
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
     let query = '';
     let response = '';
+    let isAuthorized = true;
+    let countdown = 5;
   
     async function sendQuery() {
       try {
         const res = await fetch('http://localhost:4000/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-          },
-          body: JSON.stringify({ query })
-        });
-  
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ query })
+            });
+    
+            if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+    
+            const data = await res.json();
+            response = JSON.stringify(data, null, 2);
+        } catch (error) {
+            response = error.message;
         }
-  
-        const data = await res.json();
-        response = JSON.stringify(data, null, 2);
-      } catch (error) {
-        response = error.message;
-      }
-    }
-  
+        }
+
+        function handleLogout() {
+            // Clear the token from session storage
+            sessionStorage.removeItem('token');
+
+            // Redirect to the login/home page
+            goto('/');
+        }
+    
     onMount(() => {
       // Redirect to login if not authenticated
       if (!sessionStorage.getItem('token')) {
-        window.location.href = '/login';
+            isAuthorized = false;
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown === 0) {
+                clearInterval(interval);
+                goto('/');
+                }
+            }, 1000);
       }
     });
   </script>
-  
+
+  {#if isAuthorized}
   <div class="dashboard">
     <h1>Welcome to the Dashboard!</h1>
+    <button class="logout-button" on:click={handleLogout}>Logout</button>
     <h2>Input:</h2>
     <textarea bind:value={query} placeholder="Type your GraphQL query or mutation here"></textarea>
     <button on:click={sendQuery}>Send</button>
     <h3>Output:</h3>
     <textarea readonly value={response}></textarea>
   </div>
+  {:else}
+  <div class="unauthorized">
+    <h1>You are not authorized to view this page.</h1>
+    <span>You will be redirected in {countdown} seconds.</span>
+  </div>
+{/if}
   
   <style>
     .dashboard {
@@ -81,6 +107,17 @@
   
     button:hover {
       background-color: #0056b3;
+    }
+
+    .unauthorized {
+        padding: 1rem;
+        text-align: center;
+        color: red;
+    }
+
+    .logout-button {
+        background-color: #f44336;
+        width:50%;
     }
   </style>
   
