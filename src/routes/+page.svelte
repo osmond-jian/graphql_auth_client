@@ -18,6 +18,10 @@
   });
   
     async function handleSubmit(event) {
+      //debugging
+      // console.log('handleSubmit triggered');
+
+
       event.preventDefault();
       const query = `
         mutation Login($email: String!, $password: String!) {
@@ -26,6 +30,9 @@
       `;
   
       try {
+        //debugging
+        // console.log('Sending request with:', { email, password });
+
         const response = await fetch('http://localhost:4000/', { //change to actual graphql endpoint during deployment
           method: 'POST',
           headers: {
@@ -39,10 +46,16 @@
         });
   
         if (!response.ok) {
+          //debugging
+          // console.error('Response not ok:', response);
+
           throw new Error(`Network error: ${response.statusText}`);
         }
   
         const result = await response.json();
+
+        //debugging
+        // console.log('Response received:', result);
   
         if (result.errors) {
           throw new Error(result.errors[0].message);
@@ -57,6 +70,9 @@
         // Redirect to the dashboard
         goto('/dashboard');
       } catch (error) {
+        //debugging
+        // console.error('Error caught:', error.message);
+
         message = `Login error: ${error.message}`;
         isLoggedIn = false;
       }
