@@ -62,7 +62,7 @@
         }
 //CURRENTLY TOKEN IS STORED IN SESSION STORAGE, Can improve in later iterations for more security !!!!! 
         // Save the token to session storage
-        console.log(result);
+        // console.log(result);
         sessionStorage.setItem('token', result.data.login);
         isLoggedIn = true;
         message = `Successful login. Token: ${result.data.login}`;
