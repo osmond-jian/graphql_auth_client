@@ -211,6 +211,7 @@
         if (data && data.getSurvey) {
           selectedSurvey = data.getSurvey;
         } else {
+          console.log(data);
           console.error('No survey found with ID:', surveyId);
         }
       } catch (error) {
