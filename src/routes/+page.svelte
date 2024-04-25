@@ -1,84 +1,44 @@
+<!-- Contents for +page.svelte:
+
+    The HTML structure of the login form.
+    Local component state such as email, password, and isLoggedIn.
+    Minimal inline script handling form submissions which then calls functions defined in other script files. -->
 <script>
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
+    import { checkLogin, login } from '$lib/auth.js';
     let email = '';
     let password = '';
     let message = '';
     let isLoggedIn = false;
   
-    // This function will run when the component mounts, to check if the user is already logged in
-    onMount(() => {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      isLoggedIn = true;
-      // Redirect to the dashboard if the user is already logged in
-      //in the future change so that it checks if server sent data rahter than just the token
-      goto('/dashboard');
-    }
-  });
+    onMount(async () => {
+      isLoggedIn = await checkLogin(); // Assume checkLogin() is defined in +page.js or another module
+      if (isLoggedIn) {
+        goto('/dashboard');
+      }
+    });
   
     async function handleSubmit(event) {
-      //debugging
-      // console.log('handleSubmit triggered');
-
-
       event.preventDefault();
-      const query = `
-        mutation Login($email: String!, $password: String!) {
-          login(email: $email, password: $password)
-        }
-      `;
-  
       try {
-        //debugging
-        // console.log('Sending request with:', { email, password });
-
-        const response = await fetch('http://localhost:4000/', { //change to actual graphql endpoint during deployment
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionStorage.getItem('token')}`, // Include the token here
-          },
-          body: JSON.stringify({
-            query,
-            variables: { email, password }
-          }),
-        });
-  
-        if (!response.ok) {
-          //debugging
-          // console.error('Response not ok:', response);
-
-          throw new Error(`Network error: ${response.statusText}`);
+        const result = await login(email, password);
+        if (!result){
+          console.error("Error with Login", result);
         }
-  
-        const result = await response.json();
-
-        //debugging
-        // console.log('Response received:', result);
-  
-        if (result.errors) {
-          throw new Error(result.errors[0].message);
-        }
-//CURRENTLY TOKEN IS STORED IN SESSION STORAGE, Can improve in later iterations for more security !!!!! 
-        // Save the token to session storage
-        // console.log(result);
-        sessionStorage.setItem('token', result.data.login);
+        //CURRENTLY TOKEN IS STORED IN SESSION STORAGE, Can improve in later iterations for more security !!!!! 
+        sessionStorage.setItem('token', result.login);
+        message = `Login successful! Welcome!`;
         isLoggedIn = true;
-        message = `Successful login. Token: ${result.data.login}`;
-
-        // Redirect to the dashboard
+        // console.log(result);
         goto('/dashboard');
       } catch (error) {
-        //debugging
-        // console.error('Error caught:', error.message);
-
-        message = `Login error: ${error.message}`;
+        message = `Login failed: ${error.message}`;
         isLoggedIn = false;
       }
     }
   </script>
-
+  
   <style>
     /* This centers the form in the middle of the page */
     .container {
@@ -173,4 +133,3 @@
   {#if message}
     <p>{message}</p>
   {/if}
-  

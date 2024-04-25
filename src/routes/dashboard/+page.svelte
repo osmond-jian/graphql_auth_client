@@ -173,6 +173,53 @@
     }
 
   //stores the current Survey information that user wants to view/edit
+  //  async function selectSurvey(survey) {
+  //     const surveyId = survey.id;
+
+  //     const query = `
+  //       query GetSurvey($id: ID!) {
+  //         getSurvey(id: $id) {
+  //           id
+  //           title
+  //           questions {
+  //             id
+  //             text
+  //             type
+  //           }
+  //         }
+  //       }
+  //     `;
+
+  //     try {
+  //       const response = await fetch('http://localhost:4000/', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+  //         },
+  //         body: JSON.stringify({
+  //           query,
+  //           variables: { id: surveyId }
+  //         }),
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! Status: ${response.status}`);
+  //       }
+
+  //       const { data } = await response.json();
+  //       if (data && data.getSurvey) {
+  //         selectedSurvey = data.getSurvey;
+  //       } else {
+  //         console.log(data);
+  //         console.error('No survey found with ID:', surveyId);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching survey details:', error.message);
+  //     }
+  //   }
+
+      //testing new survey function
    async function selectSurvey(survey) {
       const surveyId = survey.id;
 
@@ -185,6 +232,9 @@
               id
               text
               type
+              options {
+                text
+              }
             }
           }
         }
