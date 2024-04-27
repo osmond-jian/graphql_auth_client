@@ -57,3 +57,12 @@ export async function checkLogin() {
   //should implement a check with database to see if token is correct
   return true; // If you skip server validation
 }
+
+  //logs out and removes session token      
+  export function handleLogout() {
+    // Clear the token from session storage
+    sessionStorage.removeItem('token');
+
+    // Redirect to the login/home page
+    goto('/');
+}
